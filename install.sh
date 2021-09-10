@@ -7,6 +7,7 @@ install_configs () {
 	echo "Installing Packages"
 	for c in "${configs[@]}"; do
 		echo "Installing $c"
+		mkdir -p ~/.config/$c
 		stow -vt ~/.config/$c -S $c
 	done
 	echo "Packages Installed"
