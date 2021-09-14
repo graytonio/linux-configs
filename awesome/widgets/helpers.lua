@@ -9,7 +9,12 @@
 --]]
 
 local wibox = require("wibox")
+local beautiful = require("beautiful")
+local consts = require("consts")
 local helpers = {}
+
+-- Pulls beautify themeing into widgets
+beautiful.init(consts.config_path .. "theme.lua")
 
 function helpers:set_draw_method(imagebox, scale)
    local wmargin = wibox.layout.margin()

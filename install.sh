@@ -37,7 +37,7 @@ print_usage () {
 }
 
 while getopts 'SD' flag; do
-	ops = true
+	ops=true
 	case "${flag}" in
 		S) install_configs ;;
 		D) uninstall_configs ;;

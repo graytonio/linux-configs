@@ -2,6 +2,7 @@
     Awesome WM Configuration
     Grayton Ward
 --]] 
+
 -- Import Libraries
 local gears = require("gears")
 local awful = require("awful")
@@ -10,15 +11,15 @@ local beautiful = require("beautiful")
 local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
-
 local cyclefocus = require("libs/cyclefocus")
 local consts = require("consts")
 local functions = require("functions")
+require("awful.autofocus")
 
+-- Widgets
 local batterywidget = require("widgets/battery")
 local volumewidget = require("widgets/volume")
-
-require("awful.autofocus")
+local wifiwidget = require("widgets/wifi")
 
 naughty.config.notify_callback = functions.notify_callback
 naughty.config.defaults.timeout = 10
@@ -37,8 +38,7 @@ cyclefocus.default_preset = {
 
 -- Available Layouts
 awful.layout.layouts = {
-    awful.layout.suit.tile,
-    awful.layout.suit.floating
+    awful.layout.suit.tile, awful.layout.suit.floating
     --   awful.layout.suit.tile.left,
     --   awful.layout.suit.tile.bottom,
     --   awful.layout.suit.tile.top,
@@ -57,266 +57,174 @@ awful.layout.layouts = {
 
 -- Catch Startup Errors
 if awesome.startup_errors then
-    naughty.notify(
-        {
-            preset = naughty.config.presets.critical,
-            title = "Startup Error",
-            text = awesome.startup_errors
-        }
-    )
+    naughty.notify({
+        preset = naughty.config.presets.critical,
+        title = "Startup Error",
+        text = awesome.startup_errors
+    })
 end
 
 -- Catch Runtime Errors
 do
     local in_error = false
-    awesome.connect_signal(
-        "debug::error",
-        function(err)
-            if in_error then
-                return
-            end
-            in_error = true
+    awesome.connect_signal("debug::error", function(err)
+        if in_error then return end
+        in_error = true
 
-            naughty.notify(
-                {
-                    preset = naughty.config.presets.critical,
-                    title = "Runtime Error",
-                    text = tostring(err)
-                }
-            )
-        end
-    )
+        naughty.notify({
+            preset = naughty.config.presets.critical,
+            title = "Runtime Error",
+            text = tostring(err)
+        })
+    end)
 end
-
-beautiful.init(consts.config_path .. "theme.lua")
 
 -- #region Launcher Widget
 
 -- Awesome Submenu
 local awesomemenu = {
-    {"&hotkeys", function()
-            return false, hotkeys_popup.show_help
-        end},
+    {"&hotkeys", function() return false, hotkeys_popup.show_help end},
     {"&manual", consts.terminal .. " -e man awesome"},
     {"&edit config", consts.editor_cmd .. " " .. awesome.conffile},
-    {"&restart", awesome.restart},
-    {"&quit", function()
-            awesome.quit()
-        end}
+    {"&restart", awesome.restart}, {"&quit", function() awesome.quit() end}
 }
 
 -- System Submenu
 local systemmenu = {}
 
 -- Main Dropdown Menu
-local mainmenu =
-    awful.menu(
-    {
-        items = {
-            {"&Awesome", awesomemenu},
-            {"&System", systemmenu},
-            {"&Terminal", consts.terminal}
-        }
+local mainmenu = awful.menu({
+    items = {
+        {"&Awesome", awesomemenu}, {"&System", systemmenu},
+        {"&Terminal", consts.terminal}
     }
-)
+})
 
-local launcher =
-    awful.widget.launcher(
-    {
-        image = beautiful.awesome_icon_w,
-        menu = mainmenu
-    }
-)
+local launcher = awful.widget.launcher({
+    image = beautiful.awesome_icon_w,
+    menu = mainmenu
+})
 
 menubar.menu_gen.all_menu_dirs = consts.app_folders
 menubar.utils.terminal = consts.terminal
+
+-- Widget separators
+local separator1px = wibox.widget.imagebox()
+separator1px:set_image(beautiful.get().spr1px)
+local separator2px = wibox.widget.imagebox()
+separator2px:set_image(beautiful.get().spr2px)
+local separator4px = wibox.widget.imagebox()
+separator4px:set_image(beautiful.get().spr4px)
+local separator5px = wibox.widget.imagebox()
+separator5px:set_image(beautiful.get().spr5px)
+local separator10px = wibox.widget.imagebox()
+separator10px:set_image(beautiful.get().spr10px)
+local separatorbar = wibox.widget.textbox()
+separatorbar:set_markup("|")
+
+local layouts = awful.layout.layouts
+local tags = {
+    names = {"1", "2", "3", "4", "5", "6"},
+    layouts = {
+        layouts[1], layouts[1], layouts[1], layouts[1], layouts[1], layouts[1]
+    }
+}
 -- #endregion
 
 -- #region Wibar
-local taglist_buttons =
-    gears.table.join(
-    awful.button(
-        {},
-        1,
-        function(t)
-            t:view_only()
-        end
-    ),
-    awful.button(
-        {consts.modkey},
-        1,
-        function(t)
-            if client.focus then
-                client.focus:move_to_tag(t)
-            end
-        end
-    ),
-    awful.button({}, 3, awful.tag.viewtoggle),
-    awful.button(
-        {consts.modkey},
-        3,
-        function(t)
-            if client.focus then
-                client.focus:toggle_tag(t)
-            end
-        end
-    ),
-    awful.button(
-        {},
-        4,
-        function(t)
-            awful.tag.viewnext(t.screen)
-        end
-    ),
-    awful.button(
-        {},
-        5,
-        function(t)
-            awful.tag.viewprev(t.screen)
-        end
-    )
-)
+awful.screen.connect_for_each_screen(function(s)
+    -- Set Wallpaper On Each Screen
+    functions.set_wallpaper(s)
 
-local tasklist_buttons =
-    gears.table.join(
-    awful.button(
-        {},
-        1,
-        function(c)
-            if c == client.focus then
-                c.minimized = true
-            else
-                -- Without this, the following
-                -- :isvisible() makes no sense
-                c.minimized = false
-                if not c:isvisible() and c.first_tag then
-                    c.first_tag:view_only()
-                end
-                -- This will also un-minimize
-                -- the client, if needed
-                client.focus = c
-                c:raise()
-            end
-        end
-    ),
-    awful.button({}, 3, functions.client_menu_toggle()),
-    awful.button(
-        {},
-        4,
-        function()
-            awful.client.focus.byidx(1)
-        end
-    ),
-    awful.button(
-        {},
-        5,
-        function()
-            awful.client.focus.byidx(-1)
-        end
-    )
-)
+    -- Tag Table
+    awful.tag(tags.names, s, tags.layouts)
 
-local xresources = require("beautiful.xresources")
-local dpi = xresources.apply_dpi
-local mysystray = wibox.widget.systray()
-local mysystraymargin = wibox.container.margin(mysystray, 2, 2, 2, 2)
+    s.mytaglist = awful.widget.taglist {
+        screen = s,
+        filter = awful.widget.taglist.filter.all
+    }
 
-awful.screen.connect_for_each_screen(
-    function(s)
-        -- Widget separators
-        local separator1px = wibox.widget.imagebox()
-        separator1px:set_image(beautiful.get().spr1px)
-        local separator2px = wibox.widget.imagebox()
-        separator2px:set_image(beautiful.get().spr2px)
-        local separator4px = wibox.widget.imagebox()
-        separator4px:set_image(beautiful.get().spr4px)
-        local separator5px = wibox.widget.imagebox()
-        separator5px:set_image(beautiful.get().spr5px)
-        local separator10px = wibox.widget.imagebox()
-        separator10px:set_image(beautiful.get().spr10px)
-
-        local textseparator = wibox.widget.textbox()
-        textseparator.markup = "<b> | </b>"
-
-        -- Set Wallpaper Here
-        functions.set_wallpaper(s)
-
-        -- Tag Table
-        local layouts = awful.layout.layouts
-        local tags = {
-            names = {"1", "2", "3", "4", "5", "6"},
-            layouts = {
-                layouts[1],
-                layouts[1],
-                layouts[1],
-                layouts[1],
-                layouts[1],
-                layouts[1]
-            }
+    s.mytasklist = awful.widget.tasklist {
+        screen = s,
+        filter = awful.widget.tasklist.filter.currenttags,
+        style = {
+            shape_border_width = 1,
+            shape_border_color = '#777777',
+            shape = gears.shape.rounded_bar
+        },
+        layout = {spacing = 5, layout = wibox.layout.flex.horizontal},
+        widget_template = {
+            {
+                {
+                    {
+                        {id = 'icon_role', widget = wibox.widget.imagebox},
+                        margins = 8,
+                        widget = wibox.container.margin
+                    },
+                    layout = wibox.layout.fixed.horizontal
+                },
+                left = 10,
+                right = 10,
+                widget = wibox.container.margin
+            },
+            id = 'background_role',
+            widget = wibox.container.background
         }
-        awful.tag(tags.names, s, tags.layouts)
+    }
 
-        -- Create a promptbox for each screen
-        s.mypromptbox = awful.widget.prompt()
-        s.mytaglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, taglist_buttons)
-        s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons)
+    local left_layout = wibox.layout.fixed.horizontal()
+    if (s.index == 1) then left_layout:add(launcher) end
+    left_layout:add(s.mytaglist)
+    left_layout:add(s.mytasklist)
+    left_layout:add(separator2px)
+    local textclock = wibox.widget.textclock()
 
-        s.mywibox = awful.wibox({position = "top", screen = s, height = 50})
-
-        local left_layout = wibox.layout.fixed.horizontal()
-        if (s.index == 1) then
-            left_layout:add(launcher)
-        end
-        left_layout:add(s.mytaglist)
-        left_layout:add(s.mypromptbox)
-        left_layout:add(separator10px)
-
-        local textclock = wibox.widget.textclock()
-
-        local right_layout = wibox.layout.fixed.horizontal()
-        if s.index == 1 then
-            right_layout:add(volumewidget.icon)
-            right_layout:add(textseparator)
-
-            if batterywidget.hasbattery then
-                if consts.batterytext then
-                    right_layout:add(batterywidget.text)
-                else
-                    right_layout:add(batterywidget.icon)
-                end
-            end
-
-            right_layout:add(textseparator)
-            right_layout:add(textclock)
-        end
-
-        s.mywibox:setup {
-            layout = wibox.layout.align.horizontal,
-            left_layout,
-            s.mytasklist,
-            right_layout
-        }
+    local endshape = function(cr, width, height)
+        gears.shape.rectangular_tag(cr, width, height, -(height / 2))
     end
-)
+
+    local right_layout = wibox.layout.fixed.horizontal()
+    right_layout:set_spacing(-26)
+
+    if s.index == 1 then
+        right_layout:add(wifiwidget)
+        right_layout:add(volumewidget)
+
+        if batterywidget.hasbattery then right_layout:add(batterywidget) end
+
+        local clockmargin = wibox.container.margin(textclock, 30, 0, 10, 10)
+        local clockbackground = wibox.container.background(clockmargin,
+                                                           beautiful.colors1,
+                                                           endshape)
+        right_layout:add(clockbackground)
+    end
+
+    s.mywibox = awful.wibox({position = "top", screen = s, height = 50})
+    s.mywibox:setup{
+        layout = wibox.layout.align.horizontal,
+        left_layout,
+        nil,
+        right_layout
+    }
+end)
 -- #endregion
 
 -- #region Mouse Bindings
-root.buttons(
-    gears.table.join(
-        awful.button(
-            {},
-            3,
-            function()
-                mainmenu:toggle()
-            end
-        ),
-        awful.button({}, 4, awful.tag.viewnext),
-        awful.button({}, 5, awful.tag.viewprev)
-    )
-)
+root.buttons(gears.table.join(awful.button({}, 3,
+                                           function() mainmenu:toggle() end),
+                              awful.button({}, 4, awful.tag.viewnext),
+                              awful.button({}, 5, awful.tag.viewprev)))
 -- #endregion
 
 -- #region Key bindings
+local clientbuttons = gears.table.join(awful.button({}, 1, function(c)
+    client.focus = c
+    c:raise()
+end), awful.button({consts.modkey}, 1, awful.mouse.client.move), awful.button(
+                                           {consts.modkey}, 3,
+                                           awful.mouse.client.resize))
+
+-- local globalkeys = require("keybinds")
 local globalkeys =
     gears.table.join(
     awful.key(
@@ -920,20 +828,6 @@ for i = 1, 9 do
     )
 end
 
-local clientbuttons =
-    gears.table.join(
-    awful.button(
-        {},
-        1,
-        function(c)
-            client.focus = c
-            c:raise()
-        end
-    ),
-    awful.button({consts.modkey}, 1, awful.mouse.client.move),
-    awful.button({consts.modkey}, 3, awful.mouse.client.resize)
-)
-
 root.keys(globalkeys)
 -- #endregion
 
@@ -951,72 +845,41 @@ awful.rules.rules = {
             buttons = clientbuttons,
             screen = awful.screen.preferred,
             titlebars_enabled = false,
-            placement = awful.placement.no_overlap + awful.placement.no_offscreen
+            placement = awful.placement.no_overlap +
+                awful.placement.no_offscreen
         }
-    },
-    {
+    }, {
         rule_any = {
             instance = {"copyq"},
             class = {
-                "Arandr",
-                "Gpick",
-                "Kruler",
-                "Sxiv",
-                "Tor Browser",
-                "Wpa_gui",
-                "pinentry",
-                "veromix",
-                "xtightvncviewer"
+                "Arandr", "Gpick", "Kruler", "Sxiv", "Tor Browser", "Wpa_gui",
+                "pinentry", "veromix", "xtightvncviewer"
             },
             name = {"Event Tester"},
             role = {"AlarmWindow", "pop-up", "About"}
         },
         properties = {floating = true}
-    },
-    {
-        rule_any = {
-            name = {
-                "Open Folder",
-                "Open File"
-            }
-        },
-        properties = {
-            floating = true,
-            modal = true,
-            width = 1920,
-        }
+    }, {
+        rule_any = {name = {"Open Folder", "Open File"}},
+        properties = {floating = true, modal = true, width = 1920}
     }
 }
 -- #endregion
 
 -- #region Signals
-screen.connect_signal(
-    "property::geometry",
-    function(s)
-        functions.set_wallpaper(s)
+screen.connect_signal("property::geometry",
+                      function(s) functions.set_wallpaper(s) end)
+client.connect_signal("manage", function(c)
+    if awesome.startup and not c.size_hints.user_position and
+        not c.size_hints.program_position then
+        awful.placement.no_offscreen(c)
     end
-)
-client.connect_signal(
-    "manage",
-    function(c)
-        if awesome.startup and not c.size_hints.user_position and not c.size_hints.program_position then
-            awful.placement.no_offscreen(c)
-        end
-    end
-)
+end)
 
-client.connect_signal(
-    "focus",
-    function(c)
-        c.border_color = beautiful.border_focus
-    end
-)
-client.connect_signal(
-    "unfocus",
-    function(c)
-        c.border_color = beautiful.border_normal
-    end
-)
+client.connect_signal("focus",
+                      function(c) c.border_color = beautiful.border_focus end)
+client.connect_signal("unfocus",
+                      function(c) c.border_color = beautiful.border_normal end)
 client.connect_signal("property::size", functions.client_set_border)
 client.connect_signal("property::fullscreen", functions.client_set_border)
 -- #endregion

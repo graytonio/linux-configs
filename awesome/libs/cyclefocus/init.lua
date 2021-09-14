@@ -92,7 +92,8 @@ cyclefocus = {
     -- Default builtin filters.
     -- (meant to get applied always, but you could override them)
     cycle_filters = {
-        function(c, source_c) return not c.minimized end,  --luacheck: no unused args
+        -- function(c, source_c) return not c.minimized end,  --luacheck: no unused args
+        function (c, source_c) return true end
     },
 
     -- EXPERIMENTAL: only add clients to the history that have been focused by
