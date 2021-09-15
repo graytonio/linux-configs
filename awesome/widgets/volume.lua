@@ -38,4 +38,8 @@ helpers:listen(widget, 40)
 local volume = wibox.container.margin(widget, 40, 30, 10, 10)
 local background = wibox.container.background(volume, beautiful.colors1, gears.shape.powerline)
 
+background.raise = widget.raise
+background.lower = widget.lower
+background.mute = widget.mute
+
 return background

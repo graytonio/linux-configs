@@ -152,7 +152,7 @@ awful.screen.connect_for_each_screen(function(s)
             shape_border_color = '#777777',
             shape = gears.shape.rounded_bar
         },
-        layout = {spacing = 5, layout = wibox.layout.flex.horizontal},
+        layout = {spacing = 8, layout = wibox.layout.flex.horizontal},
         widget_template = {
             {
                 {
@@ -569,7 +569,7 @@ local globalkeys =
         {consts.modkey},
         "d",
         function()
-            awful.util.spawn("rofi -show run")
+            awful.util.spawn("rofi -show drun")
         end,
         {description = "open app launcher", group = "launcher"}
     ), -- Menubar
@@ -862,7 +862,7 @@ awful.rules.rules = {
     }, {
         rule_any = {name = {"Open Folder", "Open File"}},
         properties = {floating = true, modal = true, width = 1920}
-    }
+    },
 }
 -- #endregion
 
