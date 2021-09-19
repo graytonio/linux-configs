@@ -32,15 +32,31 @@ get_packages () {
 	echo "Found ${#configs[@]} Packages"
 }
 
-print_usage () {
-	echo "Usage install.sh -S | D"
+install_individual_package () {
+	echo "Installing $1"
+	rm -r ~/.config/$1/*
+	mkdir -p ~/.config/$1
+	stow -vt ~/.config/$1 -S $1
+	echo "$1 Installed"
 }
 
-while getopts 'SD' flag; do
+uninstall_individual_package () {
+	echo "Uninstalling $1"
+	stow -vt ~/.config/$1 -D $1
+	echo "$1 Uninstalled"
+}
+
+print_usage () {
+	echo "Usage install.sh -S | D | A | R"
+}
+
+while getopts 'ARS:D:' flag; do
 	ops=true
 	case "${flag}" in
-		S) install_configs ;;
-		D) uninstall_configs ;;
+		A) install_configs ;;
+		R) uninstall_configs ;;
+		S) install_individual_package $OPTARG ;;
+		D) uninstall_individual_package $OPTARG ;;
 		*) print_usage 
 		   exit 1;;
 	esac
