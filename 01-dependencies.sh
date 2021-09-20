@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Repo Dependencies
-sudo pacman -S awesome alacritty ranger rofi git base-devel ttf-hack
+sudo pacman -S awesome alacritty ranger rofi git base-devel ttf-hack fish
 
 # Install Yay
 git clone https://aur.archlinux.org/yay.git
