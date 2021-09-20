@@ -38,9 +38,10 @@ cyclefocus.default_preset = {
 
 -- Available Layouts
 awful.layout.layouts = {
-    awful.layout.suit.tile, awful.layout.suit.floating
+      awful.layout.suit.tile, 
     --   awful.layout.suit.tile.left,
-    --   awful.layout.suit.tile.bottom,
+      awful.layout.suit.tile.bottom,
+      awful.layout.suit.floating,
     --   awful.layout.suit.tile.top,
     --   awful.layout.suit.fair,
     --   awful.layout.suit.fair.horizontal,
@@ -123,12 +124,23 @@ local separatorbar = wibox.widget.textbox()
 separatorbar:set_markup("|")
 
 local layouts = awful.layout.layouts
-local tags = {
-    names = {"1", "2", "3", "4", "5", "6"},
-    layouts = {
-        layouts[1], layouts[1], layouts[1], layouts[1], layouts[1], layouts[1]
+-- local tags = {
+--     names = {"1", "2", "3", "4", "5", "6"},
+--     layouts = {
+--         layouts[1], layouts[1], layouts[1], layouts[1], layouts[1], layouts[1]
+--     }
+-- }
+
+function getTags(s)
+    local layoutTable = {}
+    layoutTable[1] = layouts[1]
+    layoutTable[2] = layouts[2]
+
+    return {
+        names = {"1", "2", "3", "4", "5", "6"},
+        layouts = layouts[s]
     }
-}
+end
 -- #endregion
 
 -- #region Wibar
@@ -137,6 +149,7 @@ awful.screen.connect_for_each_screen(function(s)
     functions.set_wallpaper(s)
 
     -- Tag Table
+    local tags = getTags(s.index)
     awful.tag(tags.names, s, tags.layouts)
 
     s.mytaglist = awful.widget.taglist {
@@ -145,10 +158,10 @@ awful.screen.connect_for_each_screen(function(s)
     }
 
     s.mytasklist = awful.widget.tasklist {
-        screen = s,
+	screen = s,
         filter = awful.widget.tasklist.filter.currenttags,
-        style = {
-            shape_border_width = 1,
+	style = {
+	    shape_border_width = 1,
             shape_border_color = '#777777',
             shape = gears.shape.rounded_bar
         },
@@ -158,13 +171,13 @@ awful.screen.connect_for_each_screen(function(s)
                 {
                     {
                         {id = 'icon_role', widget = wibox.widget.imagebox},
-                        margins = 8,
+                        margins = 4,
                         widget = wibox.container.margin
                     },
                     layout = wibox.layout.fixed.horizontal
                 },
-                left = 10,
-                right = 10,
+		left = 5,
+		right = 5,
                 widget = wibox.container.margin
             },
             id = 'background_role',
@@ -186,20 +199,30 @@ awful.screen.connect_for_each_screen(function(s)
     local right_layout = wibox.layout.fixed.horizontal()
     right_layout:set_spacing(-26)
 
+    local clockwidget = wibox.container.margin(textclock, 30, 0, 0, 0)
+
+    local widgets = {
+        wifiwidget,
+        volumewidget,
+        batterywidget,
+        clockwidget
+    }
+
+    local widgetsToRender = {}
+    for i,w in ipairs(widgets) do
+        if(not w.render or w.render()) then table.insert(widgetsToRender, w) end
+    end 
+
     if s.index == 1 then
-        right_layout:add(wifiwidget)
-        right_layout:add(volumewidget)
-
-        if batterywidget.hasbattery then right_layout:add(batterywidget) end
-
-        local clockmargin = wibox.container.margin(textclock, 30, 0, 10, 10)
-        local clockbackground = wibox.container.background(clockmargin,
-                                                           beautiful.colors1,
-                                                           endshape)
-        right_layout:add(clockbackground)
+        for i,w in ipairs(widgetsToRender) do
+            local color = i % 2 == 0 and beautiful.colors1 or beautiful.colors2
+            local shape = i == #widgetsToRender and endshape or gears.shape.powerline
+            local background = wibox.container.background(w, color, shape)
+            right_layout:add(background)
+        end
     end
 
-    s.mywibox = awful.wibox({position = "top", screen = s, height = 50})
+    s.mywibox = awful.wibox({position = "top", screen = s, height = 30})
     s.mywibox:setup{
         layout = wibox.layout.align.horizontal,
         left_layout,
@@ -845,6 +868,7 @@ awful.rules.rules = {
             buttons = clientbuttons,
             screen = awful.screen.preferred,
             titlebars_enabled = false,
+            floating = false,
             placement = awful.placement.no_overlap +
                 awful.placement.no_offscreen
         }

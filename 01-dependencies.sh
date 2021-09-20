@@ -12,3 +12,6 @@ rm -r yay
 
 # Yay dependencies
 yay -S pywal
+
+# Install starship prompt
+sh -c "$(curl -fsSL https://starship.rs/install.sh)"

@@ -53,8 +53,8 @@ print_usage () {
 while getopts 'ARS:D:' flag; do
 	ops=true
 	case "${flag}" in
-		A) install_configs ;;
-		R) uninstall_configs ;;
+		# A) install_configs ;;
+		# R) uninstall_configs ;;
 		S) install_individual_package $OPTARG ;;
 		D) uninstall_individual_package $OPTARG ;;
 		*) print_usage 

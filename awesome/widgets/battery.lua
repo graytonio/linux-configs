@@ -5,16 +5,18 @@ local beautiful = require('beautiful')
 local naughty = require("naughty")
 local helpers = require("widgets/helpers")
 
-local widget = {}
 local batterytext = "--"
 
 local adapter = "BAT0"
 local acAdapter = "AC0"
 local charge = "charge"
 
-widget = wibox.widget.textbox()
-widget.valign = "center"
-widget.align = "center"
+text = wibox.widget.textbox()
+widget = wibox.container.margin(text, 40, 20, 0, 0)
+
+function widget.render() 
+   return widget.hasbattery
+end
 
 function widget:check()
    local adapters = string.gmatch(helpers:run("ls /sys/class/power_supply/"), "%S+")
@@ -53,7 +55,7 @@ function widget:update()
          batterytext = " " .. battery .. "%"
       end
 
-      widget:set_markup(batterytext)
+      text:set_markup(batterytext)
 
       if ((battery == 18 or battery == 10 or battery < 5) and sta:match("Discharging")) then
          sendNotify = true
@@ -75,7 +77,7 @@ function widget:update()
       end
 
    else
-      widget:set_markup("N/A")
+      text:set_markup("N/A")
    end
 end
 
@@ -85,8 +87,4 @@ if widget.hasbattery then
    helpers:listen(widget, 10)
 end
 
-local margin = wibox.container.margin(widget, 40, 30, 10, 10)
-local background = wibox.container.background(margin, beautiful.colors2, gears.shape.powerline)
-background.hasbattery = widget.hasbattery
-
-return background
+return widget

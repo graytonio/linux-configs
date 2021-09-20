@@ -4,10 +4,10 @@ local gears = require('gears')
 local beautiful = require('beautiful')
 local helpers = require("widgets/helpers")
 
-local widget = {}
 local volumetext = "--"
 
-widget = wibox.widget.textbox()
+text = wibox.widget.textbox()
+widget = wibox.container.margin(text, 40, 30, 0, 0)
 
 function widget:update()
    local status = helpers:run("amixer sget Master")
@@ -15,7 +15,7 @@ function widget:update()
    
    volumetext = "蓼 " .. volume .. "%"
 
-   widget:set_markup(volumetext)
+   text:set_markup(volumetext)
 end
 
 function widget:raise()
@@ -35,11 +35,4 @@ end
 
 helpers:listen(widget, 40)
 
-local volume = wibox.container.margin(widget, 40, 30, 10, 10)
-local background = wibox.container.background(volume, beautiful.colors1, gears.shape.powerline)
-
-background.raise = widget.raise
-background.lower = widget.lower
-background.mute = widget.mute
-
-return background
+return widget

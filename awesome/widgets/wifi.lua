@@ -4,46 +4,44 @@ local beautiful = require('beautiful')
 local naughty = require("naughty")
 local helpers = require('widgets/helpers')
 
-local widget = {}
-local wifitext = "--"
-
-widget = wibox.widget.textbox()
-
 local function isempty(s)
     return s == nil or s == ''
 end
+
+local wifitext = "--"
+
+text = wibox.widget.textbox()
+widget = wibox.container.margin(text, 40, 20, 0, 0)
+
 
 function widget:update()
     local currentssid = helpers:run("nmcli -f NAME c show --active | awk '(NR>1)'")
     if not isempty(currentssid) then wifitext = "直 " .. currentssid
     else wifitext = "睊" end
+    text:set_markup(wifitext)
+end
 
-    widget:set_markup(wifitext)
+function widget.render()
+    local connectionType = helpers:run("nmcli -f TYPE c show --active | awk '(NR>1)'")
+    return not connectionType == "ethernet"
 end
 
 local notification
 local function showpopup() 
     naughty.destroy(notification)
-    -- notification = naughty.notify {
-    --     text = wifitext,
-    --     position = "top_right",
-    -- }
 
     local networks = helpers:run("nmcli device wifi | awk \"(NR>1)\"")
     notification = naughty.notify {
         text = networks,
         title = "Available Networks",
         position = "top_right",
-        width = 1920
+        width = auto
     }
 end
 
 helpers:listen(widget)
 
-local margin = wibox.container.margin(widget, 40, 20, 10, 10)
-local background = wibox.container.background(margin, beautiful.colors2, gears.shape.powerline)
+widget:connect_signal("mouse::enter", function() showpopup() end)
+widget:connect_signal("mouse::leave", function() naughty.destroy(notification) end)
 
-background:connect_signal("mouse::enter", function() showpopup() end)
-background:connect_signal("mouse::leave", function() naughty.destroy(notification) end)
-
-return background
+return widget

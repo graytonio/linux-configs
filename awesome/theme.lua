@@ -62,7 +62,7 @@ theme                                           = {}
 theme.theme_path                                = images_path
 theme.wallpaper                                 = theme_wallpaper
 theme.icon_theme                                = "Papirus-Adapta-Nokto"
-theme.font                                      = "Hack Nerd Font Mono 10"
+theme.font                                      = "Hack Nerd Font Mono 12"
 
 -- | Base | --
 theme.base_color                                = base_color
@@ -124,7 +124,7 @@ theme.tasklist_shape                            = gears.shape.powerline
 
 -- | Taglist squares | --
 theme.taglist_fg_focus                          = colors.colors1
-theme.taglist_font                              = "Hack Nerd Font Mono 10"
+theme.taglist_font                              = "Hack Nerd Font Mono 12"
 theme.taglist_shape                             = gears.shape.powerline
 
 -- | Separators | --
