@@ -1,17 +1,17 @@
 #!/bin/bash
 
 # Repo Dependencies
-sudo pacman -S awesome alacritty ranger rofi git base-devel ttf-hack fish exa
+sudo pacman -S --noconfirm awesome alacritty ranger rofi git base-devel ttf-hack fish exa stow
 
 # Install Yay
 git clone https://aur.archlinux.org/yay.git
 cd yay
-makepkg -si
+sudo makepkg --noconfrm -si
 cd ..
 rm -r yay
 
 # Yay dependencies
-yay -S pywal
+sudo yay --noconfirm -S pywal
 
 # Install starship prompt
 sh -c "$(curl -fsSL https://starship.rs/install.sh)"
