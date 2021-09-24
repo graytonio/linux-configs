@@ -8,7 +8,7 @@ git clone https://aur.archlinux.org/yay.git
 cd yay
 sudo makepkg --noconfrm -si
 cd ..
-rm -r yay
+sudo rm -r yay
 
 # Yay dependencies
 sudo yay --noconfirm -S pywal
