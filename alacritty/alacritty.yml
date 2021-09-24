@@ -1,0 +1,49 @@
+font:
+  normal:
+    family: Hack
+    style: Regular
+
+  bold:
+    family: Hack
+    style: Bold
+
+  italic:
+    family: Hack
+    style: Italic
+
+  bold_italic:
+    family: Hack
+    style: Bold Italic
+
+  size: 12.0
+
+shell:
+  program: /usr/bin/fish
+
+# BEGIN ACE
+colors:
+  primary:
+    background: '#0D0D16'
+    foreground: '#abe1f4'
+  cursor:
+    text:       '#0D0D16'
+    cursor:     '#abe1f4'
+  normal:
+    black:      '#0D0D16'
+    red:        '#304A6E'
+    green:      '#CC2233'
+    yellow:     '#40669B'
+    blue:       '#CB6D92'
+    magenta:    '#568BB6'
+    cyan:       '#55A3ED'
+    white:      '#abe1f4'
+  bright:
+    black:      '#779daa'
+    red:        '#304A6E'
+    green:      '#CC2233'
+    yellow:     '#40669B'
+    blue:       '#CB6D92'
+    magenta:    '#568BB6'
+    cyan:       '#55A3ED'
+    white:      '#abe1f4'
+# END ACE
