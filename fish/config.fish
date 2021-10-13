@@ -128,6 +128,7 @@ alias hw='hwinfo --short'                                   # Hardware Info
 alias big="expac -H M '%m\t%n' | sort -h | nl"              # Sort installed packages according to size in MB
 alias gitpkg='pacman -Q | grep -i "\-git" | wc -l'			# List amount of -git packages
 alias wals="wal -o $HOME/config/postwal.sh -i"
+alias ssh="kitty +kitten ssh"
 
 # Get fastest mirrors 
 alias mirror="sudo reflector -f 30 -l 30 --number 10 --verbose --save /etc/pacman.d/mirrorlist" 
@@ -150,6 +151,8 @@ alias jctl="journalctl -p 3 -xb"
 # Recent installed packages
 alias rip="expac --timefmt='%Y-%m-%d %T' '%l\t%n %v' | sort | tail -200 | nl"
 
+# Add Go to PATH
+set -U PATH $PATH:/usr/local/go/bin
 
 ## Run paleofetch if session is interactive
 if status --is-interactive
