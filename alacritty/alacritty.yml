@@ -19,31 +19,8 @@ font:
 
 shell:
   program: /usr/bin/fish
+  args:
+    - --login
 
-# BEGIN ACE
-colors:
-  primary:
-    background: '#0F161E'
-    foreground: '#96c9ce'
-  cursor:
-    text:       '#0F161E'
-    cursor:     '#96c9ce'
-  normal:
-    black:      '#0F161E'
-    red:        '#595A5A'
-    green:      '#AE4A54'
-    yellow:     '#6BA37C'
-    blue:       '#B1A148'
-    magenta:    '#AB4CB7'
-    cyan:       '#F605E0'
-    white:      '#96c9ce'
-  bright:
-    black:      '#698c90'
-    red:        '#595A5A'
-    green:      '#AE4A54'
-    yellow:     '#6BA37C'
-    blue:       '#B1A148'
-    magenta:    '#AB4CB7'
-    cyan:       '#F605E0'
-    white:      '#96c9ce'
-# END ACE
+key_bindings:
+  - { key: Return, mods: Control|Shift, action: SpawnNewInstance }
