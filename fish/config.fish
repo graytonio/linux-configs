@@ -7,6 +7,7 @@ set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"
 set -x STARSHIP_CONFIG ~/.config/starship/starship.toml
 if status --is-interactive
    starship init fish | source
+   cat ~/.cache/wal/sequences
 end
 
 if test -f ~/.config/fish/fish_aliases.fish
